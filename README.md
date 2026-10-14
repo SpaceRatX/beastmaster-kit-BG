@@ -52,12 +52,18 @@ Disadvantages:
 - **Call of the Wild** (HLA, once): permanently sets a spell state that makes each Summon Razorback cast call a second razorback.
 - **Restrictions**: blunt weapons are blocked by item type. Plate and full plate get a "not usable by Beastmaster" effect, so they show red. No dual-classing. Spells cast 1 speed factor slower; innates are affected too, except Avian Guardians, which is instant.
 - **Stock perks removed**: +15% stealth, Find Familiar, Animal Summoning I–III. Normal ranger abilities stay.
+- **Weapon immunity**: razorbacks summoned at level 11 and above (tiers 3 and 4) are immune to non-magical weapons, inherited from the Spirit Lion. This is intended, not a bug.
 - **Party AI**: razorbacks follow the party AI toggle. With AI off, they only act when ordered.
+
+## Tested on
+- Baldur's Gate II: Enhanced Edition v2.6 (macOS), English, with Sword Coast Stratagems and Tweaks Anthology installed
+- EET: untested. The kit should work, but the one-word "Beastmaster" name fix will likely be skipped (EET numbers its game text differently), so the stock "Beast Master" name may still show.
 
 ## What it changes
 Only the **BEASTMASTER** rows and columns of shared tables (`kitlist`, `clastext`, `weapprof`, `dualclas`, `luabbr`), the kit's own name and description strings, and one effect added to each plate/full-plate armor. It also adds one row each to `splprot.2da` and `statdesc.2da` and one spell state to `splstate.ids`. All new resources use the `BMK` prefix.
 
 ## Credits
+- Author: SpaceRatX
 - Built with WeiDU and documentation from the [IESDP](https://gibberlings3.github.io/iesdp/).
 - Kit concept inspired by Beastmaster from Dota.
 - Baldur's Gate II: Enhanced Edition is © Beamdog / Wizards of the Coast. This is a fan mod.

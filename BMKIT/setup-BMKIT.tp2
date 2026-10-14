@@ -3,7 +3,7 @@
     Touches ONLY the BEASTMASTER rows/columns of shared tables; every new file uses the BMK prefix. */
 
 BACKUP ~BMKIT/backup~
-AUTHOR ~YOUR_ALIAS (see README)~
+AUTHOR ~SpaceRatX~
 VERSION ~1.0.1~
 
 LANGUAGE ~English~ ~english~ ~BMKIT/tra/english/bmkit.tra~
