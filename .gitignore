@@ -6,3 +6,4 @@ BMKIT/backup/
 .DS_Store
 __pycache__/
 CONTEXT.md
+tools/
