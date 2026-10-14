@@ -1,0 +1,357 @@
+/*  Beastmaster Rework - replaces the vanilla Beast Master ranger kit.
+    Batch 1: kit shell (tables, description, proficiencies, restrictions).
+    Touches ONLY the BEASTMASTER rows/columns of shared tables; every new file uses the BMK prefix. */
+
+BACKUP ~BMKIT/backup~
+AUTHOR ~YOUR_ALIAS (see README)~
+VERSION ~1.0.1~
+
+LANGUAGE ~English~ ~english~ ~BMKIT/tra/english/bmkit.tra~
+
+BEGIN ~Beastmaster Rework~
+REQUIRE_PREDICATE GAME_IS ~bg2ee eet~ @6
+
+OUTER_SET bmk_lower = RESOLVE_STR_REF(@1)
+OUTER_SET bmk_mixed = RESOLVE_STR_REF(@2)
+OUTER_SET bmk_help  = RESOLVE_STR_REF(@3)
+OUTER_SET bmk_blunt = RESOLVE_STR_REF(@4)
+OUTER_SET bmk_plate = RESOLVE_STR_REF(@5)
+
+// ---------------------------------------------------------------- 1. read current Beast Master CLAB name
+OUTER_SPRINT bmk_oldclab ~~
+COPY_EXISTING ~kitlist.2da~ ~override~
+  COUNT_2DA_ROWS 10 nr
+  FOR (r = 0; r < nr; ++r) BEGIN
+    READ_2DA_ENTRY r 1 10 name
+    PATCH_IF ~%name%~ STRING_EQUAL_CASE ~BEASTMASTER~ BEGIN
+      READ_2DA_ENTRY r 5 10 bmk_oldclab
+      READ_2DA_ENTRY r 2 10 bmk_oldlower
+      READ_2DA_ENTRY r 3 10 bmk_oldmixed
+    END
+  END
+BUT_ONLY
+ACTION_IF ~%bmk_oldclab%~ STRING_EQUAL ~~ BEGIN
+  FAIL ~BEASTMASTER row not found in kitlist.2da~
+END
+
+// one-word name + new description on the kit's own stock strings (record screen and SCS's UI read these
+// directly). The {K=9,C=12} tag SCS uses to identify the kit is kept.
+ACTION_GET_STRREF 25159 bmk_t1
+ACTION_GET_STRREF 25188 bmk_t2
+ACTION_GET_STRREF 25212 bmk_t3
+ACTION_IF (~%bmk_t1%~ STRING_CONTAINS_REGEXP ~[Bb]east ?[Mm]aster~) = 0 BEGIN
+  ACTION_IF (~%bmk_t1%~ STRING_CONTAINS_REGEXP ~{K=9,C=12}~) = 0 BEGIN
+    STRING_SET_EVALUATE 25159 @7
+  END ELSE BEGIN
+    STRING_SET_EVALUATE 25159 @2
+  END
+  OUTER_SET bmk_mixed = 25159
+END
+ACTION_IF (~%bmk_t2%~ STRING_CONTAINS_REGEXP ~[Bb]east ?[Mm]aster~) = 0 BEGIN
+  STRING_SET_EVALUATE 25188 @1
+  OUTER_SET bmk_lower = 25188
+END
+ACTION_IF (~%bmk_t3%~ STRING_CONTAINS_REGEXP ~BEAST ?MASTER~) = 0 BEGIN
+  STRING_SET_EVALUATE 25212 @3
+  OUTER_SET bmk_help = 25212
+END
+
+// ---------------------------------------------------------------- 2. passive ability (blunt ban, plate ban, -1 casting speed)
+ACTION_CLEAR_ARRAY bmk_plate_items
+COPY_EXISTING_REGEXP GLOB ~^.+\.itm$~ ~override~
+  PATCH_IF SOURCE_SIZE > 0x71 BEGIN
+    READ_ASCII 0x00 sig (4)
+    READ_SHORT 0x1c cat
+    READ_ASCII 0x22 anim (2)
+    PATCH_IF (~%sig%~ STRING_EQUAL ~ITM ~) AND (cat = 2) AND (~%anim%~ STRING_EQUAL_CASE ~4A~) BEGIN
+      TEXT_SPRINT $bmk_plate_items(~%SOURCE_RES%~) ~1~
+    END
+  END
+BUT_ONLY
+
+COPY ~BMKIT/spl/BMKPASV.SPL~ ~override~
+  LPF ADD_SPELL_EFFECT INT_VAR opcode = 189 target = 1 timing = 9 parameter1 = "-1" parameter2 = 0 END
+  PATCH_FOR_EACH cat IN 17 21 22 23 26 BEGIN   // mace/club, hammer, morning star, flail, quarterstaff
+    LPF ADD_SPELL_EFFECT INT_VAR opcode = 181 target = 1 timing = 9 parameter1 = cat parameter2 = 0 special = bmk_blunt END
+  END
+
+// plate / full plate: "not usable by Beastmaster" on the item itself (op319 vs KIT.IDS) so it shows red
+OUTER_SET bmk_kitid = IDS_OF_SYMBOL (~kit~ ~BEASTMASTER~)
+ACTION_IF bmk_kitid < 0 BEGIN OUTER_SET bmk_kitid = 0x4009 END
+ACTION_PHP_EACH bmk_plate_items AS res => v BEGIN
+  COPY_EXISTING ~%res%.itm~ ~override~
+    LPF ADD_ITEM_EQEFFECT INT_VAR opcode = 319 target = 1 timing = 2 power = 0 parameter1 = bmk_kitid parameter2 = 9 special = bmk_plate END
+END
+
+// ---------------------------------------------------------------- 3. new CLAB (copy of the current one minus stock perks, plus our passive)
+COPY_EXISTING ~%bmk_oldclab%.2da~ ~override/BMKCLAB.2da~
+  REPLACE_TEXTUALLY CASE_INSENSITIVE ~AP_SPCL341~ ~****~   // +15% stealth/hide
+  REPLACE_TEXTUALLY CASE_INSENSITIVE ~GA_SPCL342~ ~****~   // Find Familiar
+  REPLACE_TEXTUALLY CASE_INSENSITIVE ~GA_SPRA30[456]~ ~****~ // Animal Summoning I-III
+  REPLACE_TEXTUALLY CASE_INSENSITIVE ~^BMK_[A-Z]+[ %TAB%].*$~ ~~   // safety: drop our own rows if re-run on a patched table
+  COUNT_2DA_COLS nc
+  SPRINT row ~BMK_PASS AP_BMKPASV~
+  FOR (i = 2; i < nc; ++i) BEGIN SPRINT row ~%row% ****~ END
+  COUNT_2DA_ROWS nc nrows
+  INSERT_2DA_ROW nrows nc ~%row%~
+  // Summon Razorback: one use at 1, +1 at 4/8/12/16/20
+  SPRINT row ~BMK_RAZ~
+  FOR (i = 1; i < nc; ++i) BEGIN
+    PATCH_IF (i = 1) OR (i = 4) OR (i = 8) OR (i = 12) OR (i = 16) OR (i = 20) BEGIN
+      SPRINT row ~%row% GA_BMKRAZ~
+    END ELSE BEGIN
+      SPRINT row ~%row% ****~
+    END
+  END
+  COUNT_2DA_ROWS nc nrows
+  INSERT_2DA_ROW nrows nc ~%row%~
+  // Avian Guardians at level 6
+  SPRINT row ~BMK_AVG~
+  FOR (i = 1; i < nc; ++i) BEGIN
+    PATCH_IF (i = 6) BEGIN SPRINT row ~%row% GA_BMKAVG~ END ELSE BEGIN SPRINT row ~%row% ****~ END
+  END
+  COUNT_2DA_ROWS nc nrows
+  INSERT_2DA_ROW nrows nc ~%row%~
+  PRETTY_PRINT_2DA
+
+// ---------------------------------------------------------------- 4. kitlist row
+COPY_EXISTING ~kitlist.2da~ ~override~
+  COUNT_2DA_ROWS 10 nr
+  FOR (r = 0; r < nr; ++r) BEGIN
+    READ_2DA_ENTRY r 1 10 name
+    PATCH_IF ~%name%~ STRING_EQUAL_CASE ~BEASTMASTER~ BEGIN
+      SET_2DA_ENTRY r 2 10 bmk_lower
+      SET_2DA_ENTRY r 3 10 bmk_mixed
+      SET_2DA_ENTRY r 4 10 bmk_help
+      SET_2DA_ENTRY r 5 10 ~BMKCLAB~
+    END
+  END
+
+  // drop the vanilla "no metal weapons" usability bit (written textually to keep hex format)
+  REPLACE_TEXTUALLY CASE_INSENSITIVE ~\([ %TAB%]BMKCLAB[ %TAB%]+[0-9]+[ %TAB%]+\)[0-9a-fx]+~ ~\10x00004000~
+
+// ---------------------------------------------------------------- 5. clastext (EE char-gen text)
+ACTION_IF FILE_CONTAINS_EVALUATED (~clastext.2da~ ~^BEASTMASTER[ %TAB%]~) BEGIN
+  COPY_EXISTING ~clastext.2da~ ~override~
+    COUNT_2DA_ROWS 9 nr
+    FOR (r = 0; r < nr; ++r) BEGIN
+      READ_2DA_ENTRY r 0 9 name
+      PATCH_IF ~%name%~ STRING_EQUAL_CASE ~BEASTMASTER~ BEGIN
+        SET_2DA_ENTRY r 3 9 bmk_lower
+        SET_2DA_ENTRY r 4 9 bmk_help
+        SET_2DA_ENTRY r 5 9 bmk_mixed
+      END
+    END
+END ELSE BEGIN
+  APPEND ~clastext.2da~ ~BEASTMASTER 12 9 %bmk_lower% %bmk_help% %bmk_mixed% -1 0 102496 19621~
+END
+
+// ---------------------------------------------------------------- 6. weapon proficiencies (BEASTMASTER column only)
+COPY_EXISTING ~weapprof.2da~ ~override~
+  COUNT_2DA_COLS nc
+  READ_2DA_ENTRIES_NOW wp (nc - 1)
+  SET col_bm = "-1"
+  SET col_rg = "-1"
+  FOR (j = 0; j < nc - 1; ++j) BEGIN
+    READ_2DA_ENTRY_FORMER wp 0 j lab
+    PATCH_IF ~%lab%~ STRING_EQUAL_CASE ~BEASTMASTER~ BEGIN SET col_bm = j + 1 END
+    PATCH_IF ~%lab%~ STRING_EQUAL_CASE ~RANGER~      BEGIN SET col_rg = j + 1 END
+  END
+  PATCH_IF col_bm < 0 OR col_rg < 0 BEGIN PATCH_FAIL ~weapprof.2da: BEASTMASTER/RANGER column missing~ END
+  FOR (i = 1; i < wp; ++i) BEGIN
+    READ_2DA_ENTRY_FORMER wp i 0 lab
+    READ_2DA_ENTRY_FORMER wp i col_rg val
+    PATCH_IF ~%lab%~ STRING_EQUAL_CASE ~AXE~ BEGIN SET val = 4 END
+    PATCH_FOR_EACH b IN ~CLUB~ ~WARHAMMER~ ~FLAILMORNINGSTAR~ ~MACE~ ~QUARTERSTAFF~ ~BLUNT_BG1~ BEGIN
+      PATCH_IF ~%lab%~ STRING_EQUAL_CASE ~%b%~ BEGIN SET val = 0 END
+    END
+    SET_2DA_ENTRY_LATER wps i col_bm val
+  END
+  SET_2DA_ENTRIES_NOW wps (nc - 1)
+  PRETTY_PRINT_2DA
+
+// ---------------------------------------------------------------- 7. no dual-classing
+COPY_EXISTING ~dualclas.2da~ ~override~
+  REPLACE_TEXTUALLY CASE_INSENSITIVE ~^BEASTMASTER[ %TAB%].*$~ ~BEASTMASTER 0 0 0 0 0 0~
+
+// ================================================================ BATCH 2: Summon Razorback
+DEFINE_ACTION_FUNCTION bmk_make_razorback
+  INT_VAR tier = 1 hp = 0 ac = 0 thac0 = 20 apr = 1 lvl = 1 str = 18 ench = 1
+          dn = 1 ds = 6 db = 0 phys = 0 elem = 0
+          s_death = 14 s_wand = 16 s_poly = 15 s_breath = 16 s_spell = 17
+  STR_VAR src_cre = ~~ src_itm = ~~
+BEGIN
+  COPY_EXISTING ~%src_itm%.itm~ ~override/BMKCLW%tier%.itm~
+    // spirit glow/blur kept on purpose (spirit-form look)
+    WRITE_LONG 0x60 ench
+    READ_LONG 0x18 fl
+    WRITE_LONG 0x18 (fl BOR 0x40)                                 // magical weapon flag
+    READ_LONG 0x64 ab
+    WRITE_BYTE  (ab + 0x16) ds
+    WRITE_BYTE  (ab + 0x18) dn
+    WRITE_SHORT (ab + 0x1a) db
+    WRITE_SHORT (ab + 0x1c) 3                                     // slashing
+    PATCH_FOR_EACH sp IN ~SPWI605~ ~SPIN171~ ~DW#605A~ ~DW#605B~ ~SPWI614~ BEGIN   // Death Spell (+SCS subspells), Death Fog
+      LPF ADD_ITEM_EQEFFECT INT_VAR opcode = 206 target = 1 timing = 2 parameter1 = "-1" STR_VAR resource = EVAL ~%sp%~ END
+    END
+    LPF ADD_ITEM_EQEFFECT INT_VAR opcode = 293 target = 1 timing = 2 parameter2 = 1 END   // full-speed AI off-screen
+
+  COPY_EXISTING ~%src_cre%.cre~ ~override/BMKRZ%tier%.cre~
+    SAY NAME1 @10
+    SAY NAME2 @10
+    WRITE_SHORT 0x24 hp
+    WRITE_SHORT 0x26 hp
+    WRITE_SHORT 0x46 ac
+    WRITE_SHORT 0x48 ac
+    WRITE_BYTE 0x52 thac0
+    WRITE_BYTE 0x53 apr
+    WRITE_BYTE 0x54 s_death
+    WRITE_BYTE 0x55 s_wand
+    WRITE_BYTE 0x56 s_poly
+    WRITE_BYTE 0x57 s_breath
+    WRITE_BYTE 0x58 s_spell
+    PATCH_FOR_EACH o IN 0x59 0x5a 0x5b 0x5c 0x5e 0x5f BEGIN WRITE_BYTE o elem END   // fire cold elec acid magicfire magiccold
+    PATCH_FOR_EACH o IN 0x60 0x61 0x62 0x63 BEGIN WRITE_BYTE o phys END             // slash crush pierce missile
+    WRITE_BYTE 0x234 lvl
+    WRITE_BYTE 0x238 str
+    WRITE_SHORT 0x28 0x7f0b                                                          // mountain lion animation
+    WRITE_ASCII 0x248 ~BMKRAZ~ #8                                                    // override script = ID logic
+    REPLACE_CRE_ITEM ~BMKCLW%tier%~ #0 #0 #0 ~NONE~ ~WEAPON1~
+
+  COPY_EXISTING ~SPIRSUC1.EFF~ ~override/BMKRZ%tier%.EFF~
+    WRITE_ASCIIE 0x30 ~BMKRZ%tier%~ #8
+END
+
+LAF bmk_make_razorback INT_VAR tier = 1 hp = 24  ac = 4    thac0 = 14 apr = 2 lvl = 3  str = 17 ench = 1 dn = 1 ds = 6  db = 1 phys = 0  elem = 0
+  s_death = 13 s_wand = 15 s_poly = 14 s_breath = 16 s_spell = 16 STR_VAR src_cre = ~SPLION2~ src_itm = ~SPLATT2~ END
+LAF bmk_make_razorback INT_VAR tier = 2 hp = 56  ac = 2    thac0 = 10 apr = 3 lvl = 7  str = 18 ench = 2 dn = 1 ds = 8  db = 2 phys = 0  elem = 0
+  s_death = 10 s_wand = 12 s_poly = 11 s_breath = 12 s_spell = 13 STR_VAR src_cre = ~SPLION4~ src_itm = ~SPLATT4~ END
+LAF bmk_make_razorback INT_VAR tier = 3 hp = 110 ac = "-1" thac0 = 5  apr = 3 lvl = 12 str = 19 ench = 3 dn = 1 ds = 10 db = 4 phys = 15 elem = 25
+  s_death = 8 s_wand = 10 s_poly = 9 s_breath = 9 s_spell = 11 STR_VAR src_cre = ~SPLION5~ src_itm = ~SPLATT5~ END
+LAF bmk_make_razorback INT_VAR tier = 4 hp = 160 ac = "-4" thac0 = 1  apr = 4 lvl = 17 str = 19 ench = 4 dn = 2 ds = 6  db = 6 phys = 30 elem = 50
+  s_death = 5 s_wand = 7 s_poly = 6 s_breath = 5 s_spell = 8 STR_VAR src_cre = ~SPLION5~ src_itm = ~SPLATT5~ END
+
+COMPILE ~BMKIT/baf/bmkraz.baf~
+
+COPY ~BMKIT/spl/BMKRAZ.SPL~ ~override~
+  SAY NAME1 @11
+  SAY UNIDENTIFIED_DESC @12
+
+// ================================================================ BATCH 3: Avian Guardians
+// SPLPROT row: MAXHITPOINTS (stat 1) >= opcode value
+OUTER_SET bmk_hp_ge = "-1"
+COPY_EXISTING ~splprot.2da~ ~override~
+  COUNT_2DA_ROWS 4 nr
+  FOR (r = 0; r < nr; ++r) BEGIN
+    READ_2DA_ENTRY r 0 4 lab
+    PATCH_IF ~%lab%~ STRING_MATCHES_REGEXP ~^[0-9]+_BMK_MAXHP_GE$~ = 0 BEGIN SET bmk_hp_ge = r END
+  END
+  PATCH_IF bmk_hp_ge < 0 BEGIN
+    SET bmk_hp_ge = nr
+    INSERT_2DA_ROW nr 4 ~%nr%_BMK_MAXHP_GE 1 -1 4~
+  END
+BUT_ONLY_IF_IT_CHANGES
+
+// portrait icon: new STATDESC row (Globe of Blades icon frame, our own name)
+OUTER_SET bmk_avg_name = RESOLVE_STR_REF(@20)
+COPY ~BMKIT/bam/BMKAVGI.BAM~ ~override~
+OUTER_SET bmk_icon = 0
+COPY_EXISTING ~statdesc.2da~ ~override~
+  COUNT_2DA_ROWS 3 nr
+  SET mx = 0
+  FOR (r = 0; r < nr; ++r) BEGIN
+    READ_2DA_ENTRY r 0 3 idx
+    PATCH_IF IS_AN_INT idx BEGIN PATCH_IF idx > mx BEGIN SET mx = idx END END
+  END
+  SET bmk_icon = mx + 1
+  INSERT_2DA_ROW nr 3 ~%bmk_icon% %bmk_avg_name% BMKAVGI~
+
+// visual: Globe of Blades rendered in sepia (brown/black), no damage component
+COPY_EXISTING ~SPGLBBLD.VVC~ ~override/BMKAVGV.VVC~
+  READ_SHORT 0x1a cf
+  WRITE_SHORT 0x1a (cf BOR 0x200)
+
+COPY ~BMKIT/spl/BMKAV1.SPL~ ~override~
+     ~BMKIT/spl/BMKAV2.SPL~ ~override~
+     ~BMKIT/spl/BMKAV3.SPL~ ~override~
+
+COPY ~BMKIT/spl/BMKAVG.SPL~ ~override~
+  SAY NAME1 @20
+  SAY UNIDENTIFIED_DESC @21
+  LPF ALTER_EFFECT INT_VAR match_opcode = 326 parameter2 = bmk_hp_ge END
+  LPF ALTER_EFFECT INT_VAR match_opcode = 142 parameter2 = bmk_icon END
+
+// ================================================================ BATCH 4: Call of the Wild (HLA)
+// spell state marking the HLA
+OUTER_SET bmk_cotw_state = IDS_OF_SYMBOL (~splstate~ ~BMK_CALL_OF_THE_WILD~)
+ACTION_IF bmk_cotw_state < 0 BEGIN
+  OUTER_PATCH ~~ BEGIN
+    FOR (i = 100; i < 256; ++i) BEGIN
+      LOOKUP_IDS_SYMBOL_OF_INT v ~splstate~ i
+      PATCH_IF ~%v%~ STRING_EQUAL ~%i%~ BEGIN SET bmk_cotw_state = i SET i = 256 END
+    END
+  END
+  ACTION_IF bmk_cotw_state < 0 BEGIN FAIL ~No free spell state left in splstate.ids~ END
+  APPEND ~splstate.ids~ ~%bmk_cotw_state% BMK_CALL_OF_THE_WILD~ UNLESS ~BMK_CALL_OF_THE_WILD~
+  CLEAR_IDS_MAP
+END
+
+// SPLPROT row: SPLSTATE = opcode value
+OUTER_SET bmk_ss_eq = "-1"
+COPY_EXISTING ~splprot.2da~ ~override~
+  COUNT_2DA_ROWS 4 nr
+  FOR (r = 0; r < nr; ++r) BEGIN
+    READ_2DA_ENTRY r 0 4 lab
+    PATCH_IF ~%lab%~ STRING_MATCHES_REGEXP ~^[0-9]+_BMK_SPLSTATE_EQ$~ = 0 BEGIN SET bmk_ss_eq = r END
+  END
+  PATCH_IF bmk_ss_eq < 0 BEGIN
+    SET bmk_ss_eq = nr
+    INSERT_2DA_ROW nr 4 ~%nr%_BMK_SPLSTATE_EQ 0x112 -1 1~
+  END
+BUT_ONLY_IF_IT_CHANGES
+
+COPY ~BMKIT/spl/BMKCOTW.SPL~ ~override~
+  SAY NAME1 @30
+  SAY UNIDENTIFIED_DESC @31
+  LPF ALTER_EFFECT INT_VAR match_opcode = 328 parameter2 = bmk_cotw_state END
+
+COPY ~BMKIT/spl/BMKRC1.SPL~ ~override~
+     ~BMKIT/spl/BMKRC2.SPL~ ~override~
+     ~BMKIT/spl/BMKRC3.SPL~ ~override~
+     ~BMKIT/spl/BMKRC4.SPL~ ~override~
+
+COPY_EXISTING ~BMKRAZ.SPL~ ~override~
+  LPF ALTER_EFFECT INT_VAR match_opcode = 326 parameter1 = bmk_cotw_state parameter2 = bmk_ss_eq END
+
+// own HLA table: copy of the current Beast Master table + Call of the Wild
+OUTER_SPRINT bmk_abbr ~~
+COPY_EXISTING ~luabbr.2da~ ~override~
+  COUNT_2DA_ROWS 2 nr
+  FOR (r = 0; r < nr; ++r) BEGIN
+    READ_2DA_ENTRY r 0 2 k
+    PATCH_IF ~%k%~ STRING_EQUAL_CASE ~BEASTMASTER~ BEGIN READ_2DA_ENTRY r 1 2 bmk_abbr END
+  END
+BUT_ONLY
+ACTION_IF ~%bmk_abbr%~ STRING_EQUAL ~~ OR ~%bmk_abbr%~ STRING_EQUAL_CASE ~BMK~ BEGIN OUTER_SPRINT bmk_abbr ~Ra0~ END
+
+COPY_EXISTING ~LU%bmk_abbr%.2da~ ~override/LUBMK.2da~
+  REPLACE_TEXTUALLY CASE_INSENSITIVE ~AP_BMKCOTW~ ~*~
+  COUNT_2DA_ROWS 10 nr
+  SET done = 0
+  FOR (r = 0; r < nr AND done = 0; ++r) BEGIN
+    READ_2DA_ENTRY r 1 10 ab
+    PATCH_IF ~%ab%~ STRING_EQUAL ~*~ BEGIN
+      SET_2DA_ENTRY r 1 10 ~AP_BMKCOTW~
+      SET_2DA_ENTRY r 4 10 1
+      SET_2DA_ENTRY r 5 10 99
+      SET_2DA_ENTRY r 6 10 1
+      SET done = 1
+    END
+  END
+  PATCH_IF done = 0 BEGIN
+    INSERT_2DA_ROW nr 10 ~%nr% AP_BMKCOTW * * 1 99 1 * * *~
+  END
+  PRETTY_PRINT_2DA
+
+COPY_EXISTING ~luabbr.2da~ ~override~
+  REPLACE_TEXTUALLY CASE_INSENSITIVE ~^BEASTMASTER\([ %TAB%]+\)[A-Za-z0-9]+~ ~BEASTMASTER\1BMK~

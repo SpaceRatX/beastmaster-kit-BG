@@ -1,0 +1,8 @@
+# game files copied for reference/testing - not redistributable, not needed
+reference/
+tools/weidu-linux
+BMKIT/backup/
+*.debug
+.DS_Store
+__pycache__/
+CONTEXT.md

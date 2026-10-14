@@ -1,0 +1,66 @@
+@1 = ~beastmaster~
+@2 = ~Beastmaster~
+@3 = ~BEASTMASTER: Beastmasters are rangers who have turned their backs on towns for good. Many are outcasts or of mixed blood, welcome in no hall and content to keep it that way, and they are found wherever the roads give out, from the High Forest to the Cloud Peaks. In place of companions they keep the loyalty of beasts: a great razorback cat that comes when called, and hawks that gather overhead when steel is drawn. A Beastmaster fights with the axe, the tool of someone who has lived by it, and has little use for the weapons of temples and town militias.
+
+Advantages:
+– May achieve High Mastery (four slots) in Axes.
+– 1st level: May use Summon Razorback once per day. Gains one additional use at levels 4, 8, 12, 16, and 20.
+
+SUMMON RAZORBACK: The Beastmaster calls a razorback to fight alongside the party for 6 turns. Only one razorback will answer at a time; calling again dismisses the one already present. The razorback is immune to Death Spell and Death Fog, and grows stronger as the Beastmaster gains levels. Casting time: 6.
+  Level 1: 24 HP, AC 4, THAC0 14, 2 attacks per round for 1d6+1 slashing damage (strikes as a +1 weapon)
+  Level 5: 56 HP, AC 2, THAC0 10, 3 attacks per round for 1d8+2 (strikes as +2)
+  Level 11: 110 HP, AC -1, THAC0 5, 3 attacks per round for 1d10+4 (strikes as +3), 15% resistance to physical damage, 25% resistance to fire, cold, electricity, and acid
+  Level 17: 160 HP, AC -4, THAC0 1, 4 attacks per round for 2d6+6 (strikes as +4), 30% resistance to physical damage, 50% resistance to fire, cold, electricity, and acid
+
+– 6th level: May use Avian Guardians once per day.
+
+AVIAN GUARDIANS: A flock of spectral hawks wheels around the Beastmaster, throwing themselves in the way of every blow. For 4 rounds the Beastmaster gains temporary Hit Points based on current maximum Hit Points, and all damage is taken from these first. The temporary Hit Points fade when the effect ends. Casting is instantaneous.
+  Level 6: 80% of maximum Hit Points
+  Level 12: 90% of maximum Hit Points
+  Level 18: 100% of maximum Hit Points
+
+– May select the Call of the Wild high-level ability.
+
+CALL OF THE WILD: Summon Razorback now calls two razorbacks instead of one. Calling again dismisses both. This ability may be taken only once.
+
+Disadvantages:
+– May not use blunt weapons (maces, clubs, flails, morning stars, war hammers, or quarterstaves).
+– May not wear armor heavier than splint mail.
+– May not dual-class.
+– Casting time of spells is increased by 1. Innate abilities are not affected.~
+@4 = ~Beastmasters cannot use blunt weapons.~
+@5 = ~Beastmasters cannot wear armor heavier than splint mail.~
+@6 = ~This mod requires Baldur's Gate II: Enhanced Edition or EET.~
+@7 = ~Beastmaster{K=9,C=12}~
+@10 = ~Razorback~
+@11 = ~Summon Razorback~
+@12 = ~Summon Razorback
+
+The Beastmaster calls a razorback to fight alongside the party for 6 turns. Only one razorback will answer at a time; calling again dismisses the one already present, wherever it is. The razorback is immune to Death Spell and Death Fog, and grows stronger as the Beastmaster gains levels.
+
+Level 1: 24 HP, AC 4, THAC0 14, 2 attacks per round for 1d6+1 slashing damage (strikes as a +1 weapon)
+Level 5: 56 HP, AC 2, THAC0 10, 3 attacks per round for 1d8+2 (strikes as +2)
+Level 11: 110 HP, AC -1, THAC0 5, 3 attacks per round for 1d10+4 (strikes as +3), 15% resistance to physical damage, 25% resistance to fire, cold, electricity, and acid
+Level 17: 160 HP, AC -4, THAC0 1, 4 attacks per round for 2d6+6 (strikes as +4), 30% resistance to physical damage, 50% resistance to fire, cold, electricity, and acid
+
+With the Call of the Wild high-level ability, two razorbacks answer each call; calling again dismisses both.
+
+Casting time: 6
+Duration: 6 turns~
+@20 = ~Avian Guardians~
+@21 = ~Avian Guardians
+
+A flock of spectral hawks wheels around the Beastmaster, throwing themselves in the way of every blow. For 4 rounds the Beastmaster gains temporary Hit Points based on current maximum Hit Points, and all damage is taken from these first. The temporary Hit Points fade when the effect ends. This ability cannot be dispelled.
+
+Level 6: 80% of maximum Hit Points
+Level 12: 90% of maximum Hit Points
+Level 18: 100% of maximum Hit Points
+
+Casting time: Instant
+Duration: 4 rounds~
+@30 = ~Call of the Wild~
+@31 = ~Call of the Wild
+
+The Beastmaster's call now reaches further into the wilds. Summon Razorback calls two razorbacks instead of one. Calling again dismisses both.
+
+This ability may be taken only once.~

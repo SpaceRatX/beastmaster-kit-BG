@@ -1,0 +1,323 @@
+// Razorback ID script: each cast of BMKRAZ sets BMKRZ=0; new razorbacks claim/adopt an ID,
+// any razorback whose ID no longer matches BMKRZ removes itself.
+
+IF
+  Global("BMK_ME","LOCALS",1)
+  !Global("BMKRZ","GLOBAL",1)
+THEN
+  RESPONSE #100
+    CreateVisualEffectObject("SPWOOD",Myself)
+    DestroySelf()
+END
+
+IF
+  Global("BMK_ME","LOCALS",2)
+  !Global("BMKRZ","GLOBAL",2)
+THEN
+  RESPONSE #100
+    CreateVisualEffectObject("SPWOOD",Myself)
+    DestroySelf()
+END
+
+IF
+  Global("BMK_ME","LOCALS",3)
+  !Global("BMKRZ","GLOBAL",3)
+THEN
+  RESPONSE #100
+    CreateVisualEffectObject("SPWOOD",Myself)
+    DestroySelf()
+END
+
+IF
+  Global("BMK_ME","LOCALS",4)
+  !Global("BMKRZ","GLOBAL",4)
+THEN
+  RESPONSE #100
+    CreateVisualEffectObject("SPWOOD",Myself)
+    DestroySelf()
+END
+
+IF
+  Global("BMK_ME","LOCALS",5)
+  !Global("BMKRZ","GLOBAL",5)
+THEN
+  RESPONSE #100
+    CreateVisualEffectObject("SPWOOD",Myself)
+    DestroySelf()
+END
+
+IF
+  Global("BMK_ME","LOCALS",6)
+  !Global("BMKRZ","GLOBAL",6)
+THEN
+  RESPONSE #100
+    CreateVisualEffectObject("SPWOOD",Myself)
+    DestroySelf()
+END
+
+IF
+  Global("BMK_ME","LOCALS",7)
+  !Global("BMKRZ","GLOBAL",7)
+THEN
+  RESPONSE #100
+    CreateVisualEffectObject("SPWOOD",Myself)
+    DestroySelf()
+END
+
+IF
+  Global("BMK_ME","LOCALS",8)
+  !Global("BMKRZ","GLOBAL",8)
+THEN
+  RESPONSE #100
+    CreateVisualEffectObject("SPWOOD",Myself)
+    DestroySelf()
+END
+
+IF
+  Global("BMK_ME","LOCALS",9)
+  !Global("BMKRZ","GLOBAL",9)
+THEN
+  RESPONSE #100
+    CreateVisualEffectObject("SPWOOD",Myself)
+    DestroySelf()
+END
+
+IF
+  Global("BMK_ME","LOCALS",10)
+  !Global("BMKRZ","GLOBAL",10)
+THEN
+  RESPONSE #100
+    CreateVisualEffectObject("SPWOOD",Myself)
+    DestroySelf()
+END
+
+IF
+  Global("BMK_ME","LOCALS",0)
+  Global("BMKRZ","GLOBAL",0)
+  Global("BMKCYC","GLOBAL",0)
+THEN
+  RESPONSE #100
+    SetGlobal("BMKCYC","GLOBAL",1)
+    SetGlobal("BMKRZ","GLOBAL",1)
+    SetGlobal("BMK_ME","LOCALS",1)
+    Continue()
+END
+
+IF
+  Global("BMK_ME","LOCALS",0)
+  Global("BMKRZ","GLOBAL",0)
+  Global("BMKCYC","GLOBAL",1)
+THEN
+  RESPONSE #100
+    SetGlobal("BMKCYC","GLOBAL",2)
+    SetGlobal("BMKRZ","GLOBAL",2)
+    SetGlobal("BMK_ME","LOCALS",2)
+    Continue()
+END
+
+IF
+  Global("BMK_ME","LOCALS",0)
+  Global("BMKRZ","GLOBAL",0)
+  Global("BMKCYC","GLOBAL",2)
+THEN
+  RESPONSE #100
+    SetGlobal("BMKCYC","GLOBAL",3)
+    SetGlobal("BMKRZ","GLOBAL",3)
+    SetGlobal("BMK_ME","LOCALS",3)
+    Continue()
+END
+
+IF
+  Global("BMK_ME","LOCALS",0)
+  Global("BMKRZ","GLOBAL",0)
+  Global("BMKCYC","GLOBAL",3)
+THEN
+  RESPONSE #100
+    SetGlobal("BMKCYC","GLOBAL",4)
+    SetGlobal("BMKRZ","GLOBAL",4)
+    SetGlobal("BMK_ME","LOCALS",4)
+    Continue()
+END
+
+IF
+  Global("BMK_ME","LOCALS",0)
+  Global("BMKRZ","GLOBAL",0)
+  Global("BMKCYC","GLOBAL",4)
+THEN
+  RESPONSE #100
+    SetGlobal("BMKCYC","GLOBAL",5)
+    SetGlobal("BMKRZ","GLOBAL",5)
+    SetGlobal("BMK_ME","LOCALS",5)
+    Continue()
+END
+
+IF
+  Global("BMK_ME","LOCALS",0)
+  Global("BMKRZ","GLOBAL",0)
+  Global("BMKCYC","GLOBAL",5)
+THEN
+  RESPONSE #100
+    SetGlobal("BMKCYC","GLOBAL",6)
+    SetGlobal("BMKRZ","GLOBAL",6)
+    SetGlobal("BMK_ME","LOCALS",6)
+    Continue()
+END
+
+IF
+  Global("BMK_ME","LOCALS",0)
+  Global("BMKRZ","GLOBAL",0)
+  Global("BMKCYC","GLOBAL",6)
+THEN
+  RESPONSE #100
+    SetGlobal("BMKCYC","GLOBAL",7)
+    SetGlobal("BMKRZ","GLOBAL",7)
+    SetGlobal("BMK_ME","LOCALS",7)
+    Continue()
+END
+
+IF
+  Global("BMK_ME","LOCALS",0)
+  Global("BMKRZ","GLOBAL",0)
+  Global("BMKCYC","GLOBAL",7)
+THEN
+  RESPONSE #100
+    SetGlobal("BMKCYC","GLOBAL",8)
+    SetGlobal("BMKRZ","GLOBAL",8)
+    SetGlobal("BMK_ME","LOCALS",8)
+    Continue()
+END
+
+IF
+  Global("BMK_ME","LOCALS",0)
+  Global("BMKRZ","GLOBAL",0)
+  Global("BMKCYC","GLOBAL",8)
+THEN
+  RESPONSE #100
+    SetGlobal("BMKCYC","GLOBAL",9)
+    SetGlobal("BMKRZ","GLOBAL",9)
+    SetGlobal("BMK_ME","LOCALS",9)
+    Continue()
+END
+
+IF
+  Global("BMK_ME","LOCALS",0)
+  Global("BMKRZ","GLOBAL",0)
+  Global("BMKCYC","GLOBAL",9)
+THEN
+  RESPONSE #100
+    SetGlobal("BMKCYC","GLOBAL",10)
+    SetGlobal("BMKRZ","GLOBAL",10)
+    SetGlobal("BMK_ME","LOCALS",10)
+    Continue()
+END
+
+IF
+  Global("BMK_ME","LOCALS",0)
+  Global("BMKRZ","GLOBAL",0)
+  Global("BMKCYC","GLOBAL",10)
+THEN
+  RESPONSE #100
+    SetGlobal("BMKCYC","GLOBAL",1)
+    SetGlobal("BMKRZ","GLOBAL",1)
+    SetGlobal("BMK_ME","LOCALS",1)
+    Continue()
+END
+
+IF
+  Global("BMK_ME","LOCALS",0)
+  Global("BMKRZ","GLOBAL",1)
+THEN
+  RESPONSE #100
+    SetGlobal("BMK_ME","LOCALS",1)
+    Continue()
+END
+
+IF
+  Global("BMK_ME","LOCALS",0)
+  Global("BMKRZ","GLOBAL",2)
+THEN
+  RESPONSE #100
+    SetGlobal("BMK_ME","LOCALS",2)
+    Continue()
+END
+
+IF
+  Global("BMK_ME","LOCALS",0)
+  Global("BMKRZ","GLOBAL",3)
+THEN
+  RESPONSE #100
+    SetGlobal("BMK_ME","LOCALS",3)
+    Continue()
+END
+
+IF
+  Global("BMK_ME","LOCALS",0)
+  Global("BMKRZ","GLOBAL",4)
+THEN
+  RESPONSE #100
+    SetGlobal("BMK_ME","LOCALS",4)
+    Continue()
+END
+
+IF
+  Global("BMK_ME","LOCALS",0)
+  Global("BMKRZ","GLOBAL",5)
+THEN
+  RESPONSE #100
+    SetGlobal("BMK_ME","LOCALS",5)
+    Continue()
+END
+
+IF
+  Global("BMK_ME","LOCALS",0)
+  Global("BMKRZ","GLOBAL",6)
+THEN
+  RESPONSE #100
+    SetGlobal("BMK_ME","LOCALS",6)
+    Continue()
+END
+
+IF
+  Global("BMK_ME","LOCALS",0)
+  Global("BMKRZ","GLOBAL",7)
+THEN
+  RESPONSE #100
+    SetGlobal("BMK_ME","LOCALS",7)
+    Continue()
+END
+
+IF
+  Global("BMK_ME","LOCALS",0)
+  Global("BMKRZ","GLOBAL",8)
+THEN
+  RESPONSE #100
+    SetGlobal("BMK_ME","LOCALS",8)
+    Continue()
+END
+
+IF
+  Global("BMK_ME","LOCALS",0)
+  Global("BMKRZ","GLOBAL",9)
+THEN
+  RESPONSE #100
+    SetGlobal("BMK_ME","LOCALS",9)
+    Continue()
+END
+
+IF
+  Global("BMK_ME","LOCALS",0)
+  Global("BMKRZ","GLOBAL",10)
+THEN
+  RESPONSE #100
+    SetGlobal("BMK_ME","LOCALS",10)
+    Continue()
+END
+
+// melee AI (in case the stock summon script stays idle)
+IF
+  ActionListEmpty()
+  See(NearestEnemyOf(Myself))
+THEN
+  RESPONSE #100
+    AttackReevaluate(NearestEnemyOf(Myself),30)
+END
