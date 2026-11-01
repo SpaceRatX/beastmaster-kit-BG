@@ -4,12 +4,16 @@
 
 BACKUP ~BMKIT/backup~
 AUTHOR ~SpaceRatX~
-VERSION ~1.1.1~
+VERSION ~1.2~
 
 LANGUAGE ~English~ ~english~ ~BMKIT/tra/english/bmkit.tra~
 
 BEGIN ~Beastmaster Rework~
 REQUIRE_PREDICATE GAME_IS ~bgee bg2ee eet~ @6
+// Steam/Beamdog/GOG SoD ships as an unmerged DLC archive with its own dialog.tlk; text added by WeiDU would go to a
+// dialog.tlk the game never reads (wrong names/descriptions in game). DLC Merger must be run first.
+OUTER_SET bmk_notext = (FILE_EXISTS ~sod-dlc.zip~ OR FILE_EXISTS ~dlc/sod-dlc.zip~)
+ACTION_IF bmk_notext BEGIN PRINT @9 END
 
 OUTER_SET bmk_lower = RESOLVE_STR_REF(@1)
 OUTER_SET bmk_mixed = RESOLVE_STR_REF(@2)
@@ -35,10 +39,19 @@ ACTION_IF ~%bmk_oldclab%~ STRING_EQUAL ~~ BEGIN
   FAIL ~BEASTMASTER row not found in kitlist.2da~
 END
 
+ACTION_IF bmk_notext BEGIN
+  OUTER_SET bmk_lower = bmk_oldlower
+  OUTER_SET bmk_mixed = bmk_oldmixed
+  OUTER_SET bmk_help  = bmk_oldhelp
+  OUTER_SET bmk_blunt = "-1"
+  OUTER_SET bmk_plate = "-1"
+END
+
 // one-word name + new description on the kit's own stock strings (record screen and SCS's UI read these
 // directly). The {K=9,C=12} tag SCS uses to identify the kit is kept.
 // Uses the string numbers the game's own kit table points to, so it works on BG:EE, BG2:EE and EET.
 // Only strings that actually read "Beast Master"/"BEAST MASTER" are touched.
+ACTION_IF NOT bmk_notext BEGIN
 ACTION_IF IS_AN_INT bmk_oldmixed AND bmk_oldmixed > 0 BEGIN
   ACTION_GET_STRREF bmk_oldmixed bmk_t1
   ACTION_IF (~%bmk_t1%~ STRING_CONTAINS_REGEXP ~[Bb][Ee][Aa][Ss][Tt] ?[Mm][Aa][Ss][Tt][Ee][Rr]~) = 0 BEGIN
@@ -63,6 +76,7 @@ ACTION_IF IS_AN_INT bmk_oldhelp AND bmk_oldhelp > 0 BEGIN
     STRING_SET_EVALUATE bmk_oldhelp @3
     OUTER_SET bmk_help = bmk_oldhelp
   END
+END
 END
 
 ACTION_FOR_EACH res IN ~SPLION2.CRE~ ~SPLION4.CRE~ ~SPLION5.CRE~ ~SPLATT2.ITM~ ~SPLATT4.ITM~ ~SPLATT5.ITM~ ~SPIRSUC1.EFF~ BEGIN
@@ -216,8 +230,10 @@ BEGIN
     LPF ADD_ITEM_EQEFFECT INT_VAR opcode = 293 target = 1 timing = 2 parameter2 = 1 END   // full-speed AI off-screen
 
   COPY_EXISTING ~%src_cre%.cre~ ~override/BMKRZ%tier%.cre~
-    SAY NAME1 @10
-    SAY NAME2 @10
+    PATCH_IF NOT bmk_notext BEGIN   // no-text mode keeps the creature's own (Spirit Lion) name
+      SAY NAME1 @10
+      SAY NAME2 @10
+    END
     WRITE_SHORT 0x24 hp
     WRITE_SHORT 0x26 hp
     WRITE_SHORT 0x46 ac
@@ -252,9 +268,22 @@ LAF bmk_make_razorback INT_VAR tier = 4 hp = 160 ac = "-4" thac0 = 1  apr = 4 lv
 
 COMPILE ~BMKIT/baf/bmkraz.baf~
 
+OUTER_SET bmk_sl_name = "-1"
+OUTER_SET bmk_sl_desc = "-1"
+ACTION_IF FILE_EXISTS_IN_GAME ~SPCL624.SPL~ BEGIN
+  COPY_EXISTING ~SPCL624.SPL~ ~override~
+    READ_LONG 0x08 bmk_sl_name
+    READ_LONG 0x50 bmk_sl_desc
+  BUT_ONLY
+END
 COPY ~BMKIT/spl/BMKRAZ.SPL~ ~override~
-  SAY NAME1 @11
-  SAY UNIDENTIFIED_DESC @12
+  PATCH_IF bmk_notext BEGIN
+    WRITE_LONG 0x08 bmk_sl_name   // "Spirit Lion" (existing game text)
+    WRITE_LONG 0x50 bmk_sl_desc
+  END ELSE BEGIN
+    SAY NAME1 @11
+    SAY UNIDENTIFIED_DESC @12
+  END
 
 // ================================================================ BATCH 3: Avian Guardians
 // SPLPROT row: MAXHITPOINTS (stat 1) >= opcode value
@@ -272,9 +301,10 @@ COPY_EXISTING ~splprot.2da~ ~override~
 BUT_ONLY_IF_IT_CHANGES
 
 // portrait icon: new STATDESC row (Globe of Blades icon frame, our own name)
+OUTER_SET bmk_icon = 161   // no-text mode: stock Globe of Blades portrait icon
+ACTION_IF NOT bmk_notext BEGIN
 OUTER_SET bmk_avg_name = RESOLVE_STR_REF(@20)
 COPY ~BMKIT/bam/BMKAVGI.BAM~ ~override~
-OUTER_SET bmk_icon = 0
 COPY_EXISTING ~statdesc.2da~ ~override~
   COUNT_2DA_ROWS 3 nr
   SET mx = 0
@@ -284,6 +314,7 @@ COPY_EXISTING ~statdesc.2da~ ~override~
   END
   SET bmk_icon = mx + 1
   INSERT_2DA_ROW nr 3 ~%bmk_icon% %bmk_avg_name% BMKAVGI~
+END
 
 // visual: Globe of Blades rendered in sepia (brown/black), no damage component
 OUTER_SET bmk_has_globe = (FILE_EXISTS_IN_GAME ~SPGLBBLD.VVC~ AND FILE_EXISTS_IN_GAME ~SPGLBBLD.BAM~)
@@ -303,9 +334,19 @@ COPY ~BMKIT/spl/BMKAV1.SPL~ ~override~
      ~BMKIT/spl/BMKAV2.SPL~ ~override~
      ~BMKIT/spl/BMKAV3.SPL~ ~override~
 
+OUTER_SET bmk_gb_name = "-1"
+ACTION_IF FILE_EXISTS_IN_GAME ~SPPR725.SPL~ BEGIN
+  COPY_EXISTING ~SPPR725.SPL~ ~override~
+    READ_LONG 0x08 bmk_gb_name
+  BUT_ONLY
+END
 COPY ~BMKIT/spl/BMKAVG.SPL~ ~override~
-  SAY NAME1 @20
-  SAY UNIDENTIFIED_DESC @21
+  PATCH_IF bmk_notext BEGIN
+    WRITE_LONG 0x08 bmk_gb_name   // existing "Globe of Blades" name, no description
+  END ELSE BEGIN
+    SAY NAME1 @20
+    SAY UNIDENTIFIED_DESC @21
+  END
   LPF ALTER_EFFECT INT_VAR match_opcode = 326 parameter2 = bmk_hp_ge END
   LPF ALTER_EFFECT INT_VAR match_opcode = 142 parameter2 = bmk_icon END
   PATCH_IF NOT bmk_has_globe BEGIN
@@ -346,8 +387,10 @@ COPY_EXISTING ~splprot.2da~ ~override~
 BUT_ONLY_IF_IT_CHANGES
 
 COPY ~BMKIT/spl/BMKCOTW.SPL~ ~override~
-  SAY NAME1 @30
-  SAY UNIDENTIFIED_DESC @31
+  PATCH_IF NOT bmk_notext BEGIN
+    SAY NAME1 @30
+    SAY UNIDENTIFIED_DESC @31
+  END
   LPF ALTER_EFFECT INT_VAR match_opcode = 328 parameter2 = bmk_cotw_state END
 
 COPY ~BMKIT/spl/BMKRC1.SPL~ ~override~

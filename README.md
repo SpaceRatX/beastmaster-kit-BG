@@ -3,8 +3,9 @@
 A replacement for the vanilla **Beast Master** ranger kit, inspired by Dota's Beastmaster: an axe-wielding ranger with **one strong pet that scales to the end of the game** instead of a pile of fragile summons, plus a short-lived **HP buffer** as an alternative to stacking damage resistance.
 
 ## Requirements
-- **Baldur's Gate II: Enhanced Edition** (v2.6) or **EET**
+- An Enhanced Edition game: **BG:EE** (with or without Siege of Dragonspear), **BG2:EE** (v2.6) or **EET**
 - **WeiDU** v247 or newer
+- **BG:EE with Siege of Dragonspear from Steam/GOG/Beamdog:** run [DLC Merger](https://github.com/Argent77/A7-DlcMerger) first. Unmerged SoD keeps its own text file, so names and descriptions would show the wrong text. The installer refuses to run until SoD is merged.
 - A **new character**: existing Beast Masters won't retroactively gain the new level-1 abilities
 - Install **after** SCS and any mods that add or change armor, items or kits. The plate restriction is built from the armors present at install time.
 
@@ -56,8 +57,10 @@ Disadvantages:
 - **Party AI**: razorbacks follow the party AI toggle. With AI off, they only act when ordered.
 
 ## Tested on
-- Baldur's Gate II: Enhanced Edition v2.6 (macOS), English, with Sword Coast Stratagems and Tweaks Anthology installed
-- EET: untested. The kit should work, but the one-word "Beastmaster" name fix will likely be skipped (EET numbers its game text differently), so the stock "Beast Master" name may still show.
+- Baldur's Gate II: Enhanced Edition v2.6 (macOS), English, with Sword Coast Stratagems and Tweaks Anthology: fully playtested.
+- BG:EE / SoD and EET: supported since v1.1, but not yet playtested. Notes for BG:EE:
+  - If the game lacks the Globe of Blades files (a ToB spell), Avian Guardians works but has no globe animation, and falls back to the Barkskin icon.
+  - Call of the Wild is only added if the game has a high-level ability table. Razorback tiers 3–4 (levels 11 and 17) need an XP cap remover.
 
 ## What it changes
 Only the **BEASTMASTER** rows and columns of shared tables (`kitlist`, `clastext`, `weapprof`, `dualclas`, `luabbr`), the kit's own name and description strings, and one effect added to each plate/full-plate armor. It also adds one row each to `splprot.2da` and `statdesc.2da` and one spell state to `splstate.ids`. All new resources use the `BMK` prefix.

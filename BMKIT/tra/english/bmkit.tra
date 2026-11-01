@@ -64,3 +64,4 @@ Duration: 4 rounds~
 The Beastmaster's call now reaches further into the wilds. Summon Razorback calls two razorbacks instead of one. Calling again dismisses both.
 
 This ability may be taken only once.~
+@9 = ~NOTE: Siege of Dragonspear is installed as an unmerged DLC (sod-dlc.zip). The game reads text from inside that archive, which no mod can change, so this mod installs in NO-NEW-TEXT mode: everything works, but the kit keeps the stock Beast Master name and description, the razorback is named "Spirit Lion" and its summon uses the Spirit Lion text, and Avian Guardians shows the Globe of Blades name. Merging the DLC (DLC Merger) and reinstalling enables the full text.~
