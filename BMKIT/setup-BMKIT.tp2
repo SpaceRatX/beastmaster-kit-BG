@@ -4,7 +4,7 @@
 
 BACKUP ~BMKIT/backup~
 AUTHOR ~SpaceRatX~
-VERSION ~1.1~
+VERSION ~1.1.1~
 
 LANGUAGE ~English~ ~english~ ~BMKIT/tra/english/bmkit.tra~
 
@@ -41,7 +41,7 @@ END
 // Only strings that actually read "Beast Master"/"BEAST MASTER" are touched.
 ACTION_IF IS_AN_INT bmk_oldmixed AND bmk_oldmixed > 0 BEGIN
   ACTION_GET_STRREF bmk_oldmixed bmk_t1
-  ACTION_IF (~%bmk_t1%~ STRING_CONTAINS_REGEXP ~[Bb]east ?[Mm]aster~) = 0 BEGIN
+  ACTION_IF (~%bmk_t1%~ STRING_CONTAINS_REGEXP ~[Bb][Ee][Aa][Ss][Tt] ?[Mm][Aa][Ss][Tt][Ee][Rr]~) = 0 BEGIN
     ACTION_IF (~%bmk_t1%~ STRING_CONTAINS_REGEXP ~{K=9,C=12}~) = 0 BEGIN
       STRING_SET_EVALUATE bmk_oldmixed @7
     END ELSE BEGIN
@@ -52,14 +52,14 @@ ACTION_IF IS_AN_INT bmk_oldmixed AND bmk_oldmixed > 0 BEGIN
 END
 ACTION_IF IS_AN_INT bmk_oldlower AND bmk_oldlower > 0 BEGIN
   ACTION_GET_STRREF bmk_oldlower bmk_t2
-  ACTION_IF (~%bmk_t2%~ STRING_CONTAINS_REGEXP ~[Bb]east ?[Mm]aster~) = 0 BEGIN
+  ACTION_IF (~%bmk_t2%~ STRING_CONTAINS_REGEXP ~[Bb][Ee][Aa][Ss][Tt] ?[Mm][Aa][Ss][Tt][Ee][Rr]~) = 0 BEGIN
     STRING_SET_EVALUATE bmk_oldlower @1
     OUTER_SET bmk_lower = bmk_oldlower
   END
 END
 ACTION_IF IS_AN_INT bmk_oldhelp AND bmk_oldhelp > 0 BEGIN
   ACTION_GET_STRREF bmk_oldhelp bmk_t3
-  ACTION_IF (~%bmk_t3%~ STRING_CONTAINS_REGEXP ~BEAST ?MASTER~) = 0 BEGIN
+  ACTION_IF (~%bmk_t3%~ STRING_CONTAINS_REGEXP ~[Bb][Ee][Aa][Ss][Tt] ?[Mm][Aa][Ss][Tt][Ee][Rr]~) = 0 BEGIN
     STRING_SET_EVALUATE bmk_oldhelp @3
     OUTER_SET bmk_help = bmk_oldhelp
   END
@@ -190,6 +190,8 @@ COPY_EXISTING ~weapprof.2da~ ~override~
 // ---------------------------------------------------------------- 7. no dual-classing
 COPY_EXISTING ~dualclas.2da~ ~override~
   REPLACE_TEXTUALLY CASE_INSENSITIVE ~^BEASTMASTER[ %TAB%].*$~ ~BEASTMASTER 0 0 0 0 0 0~
+
+PRINT ~BMKIT strings: kit lower=%bmk_lower% mixed=%bmk_mixed% help=%bmk_help%~
 
 // ================================================================ BATCH 2: Summon Razorback
 DEFINE_ACTION_FUNCTION bmk_make_razorback
